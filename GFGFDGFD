@@ -1,0 +1,175 @@
+[code]
+#include <Servo.h>
+
+#inclu                de "HUSKYLENS.h"
+
+HUSKYLENS huskylens;
+//HUSKYLENS green line >> SDA; blue line >> SCL
+void printResult(HUSKYLENSResult result);
+
+//int pirPin = 9;  // PIR 센서 핀 번호
+int servoPin = 2;  // 서보 모터 핀 번호
+Servo myServo;  // 서보 모터 객체 생성
+
+int pirState = HIGH;  // 초기 상태를 LOW로 설정
+int val = HIGH;  // 센서 값을 저장할 변수
+int detected = -100;
+
+void setup() {
+  //pinMode(pirPin, INPUT);  // PIR 센서 핀을 입력 모드로 설정
+  myServo.attach(servoPin);  // 서보 모터 핀 설정
+  Serial.begin(115200);
+  Serial.begin(9600);
+
+  Wire.begin();
+  while (!huskylens.begin(Wire))
+  {
+      Serial.println(F("Begin failed!"));
+      Serial.println(F("1.Please recheck the \"Protocol Type\" in HUSKYLENS (General Settings>>Protocol Type>>I2C)"));
+      Serial.println(F("2.Please recheck the connection."));
+      delay(100);
+  }
+
+  
+}
+
+void loop() {
+  //val = digitalRead(pirPin);  // PIR 센서 값을 읽음
+
+  if (val == HIGH) {  // 동작이 감지되었을 때
+   //if (pirState == LOW) {
+      // 상태가 LOW에서 HIGH로 변경될 때만 메시지 출력
+      Serial.println("Motion detected");
+      pirState = HIGH;  // 상태를 HIGH로 변경
+       
+      if (!huskylens.request()) Serial.println(F("Fail to request data from HUSKYLENS, recheck the connection!"));
+        else if(!huskylens.isLearned()) Serial.println(F("Nothing learned, press learn button on HUSKYLENS to learn one!"));
+        else if(!huskylens.available()) Serial.println(F("No block or arrow appears on the screen!"));
+        else
+        {
+            while (huskylens.available())
+            {
+                HUSKYLENSResult result = huskylens.read();
+                printResult(result);
+                detected = result.ID;
+                if (detected == 1) {
+                  myServo.write(90);
+                  Serial.println(F("Detected"));
+                  delay(200);
+                }
+                else {
+                  myServo.write(0);
+                  delay(2000);
+                }
+            }
+        }    
+      //}
+    }
+   // else {
+   // if (pirState == HIGH) {
+      // 상태가 HIGH에서 LOW로 변경될 때
+    //  pirState = LOW;  // 상태를 LOW로 변경
+    }
+  //}
+//}
+
+void printResult(HUSKYLENSResult result){
+    if (result.command == COMMAND_RETURN_BLOCK){
+//        Serial.println(String()+F("Block:xCaenter=")+result.xCenter+F(",yCenter=")+result.yCenter+F(",width=")+result.width+F(",height=")+result.height+F(",ID=")+result.ID);
+        Serial.println(result.ID);
+    }
+    else if (result.command == COMMAND_RETURN_ARROW){
+        Serial.println(String()+F("Arrow:xOrigin=")+result.xOrigin+F(",yOrigin=")+result.yOrigin+F(",xTarget=")+result.xTarget+F(",yTarget=")+result.yTarget+F(",ID=")+result.ID);
+    }
+    else{
+        Serial.println("Object unknown!");
+    }
+}
+[/code][code]
+#include <Servo.h>
+
+#inclu                de "HUSKYLENS.h"
+
+HUSKYLENS huskylens;
+//HUSKYLENS green line >> SDA; blue line >> SCL
+void printResult(HUSKYLENSResult result);
+
+//int pirPin = 9;  // PIR 센서 핀 번호
+int servoPin = 2;  // 서보 모터 핀 번호
+Servo myServo;  // 서보 모터 객체 생성
+
+int pirState = HIGH;  // 초기 상태를 LOW로 설정
+int val = HIGH;  // 센서 값을 저장할 변수
+int detected = -100;
+
+void setup() {
+  //pinMode(pirPin, INPUT);  // PIR 센서 핀을 입력 모드로 설정
+  myServo.attach(servoPin);  // 서보 모터 핀 설정
+  Serial.begin(115200);
+  Serial.begin(9600);
+
+  Wire.begin();
+  while (!huskylens.begin(Wire))
+  {
+      Serial.println(F("Begin failed!"));
+      Serial.println(F("1.Please recheck the \"Protocol Type\" in HUSKYLENS (General Settings>>Protocol Type>>I2C)"));
+      Serial.println(F("2.Please recheck the connection."));
+      delay(100);
+  }
+
+  
+}
+
+void loop() {
+  //val = digitalRead(pirPin);  // PIR 센서 값을 읽음
+
+  if (val == HIGH) {  // 동작이 감지되었을 때
+   //if (pirState == LOW) {
+      // 상태가 LOW에서 HIGH로 변경될 때만 메시지 출력
+      Serial.println("Motion detected");
+      pirState = HIGH;  // 상태를 HIGH로 변경
+       
+      if (!huskylens.request()) Serial.println(F("Fail to request data from HUSKYLENS, recheck the connection!"));
+        else if(!huskylens.isLearned()) Serial.println(F("Nothing learned, press learn button on HUSKYLENS to learn one!"));
+        else if(!huskylens.available()) Serial.println(F("No block or arrow appears on the screen!"));
+        else
+        {
+            while (huskylens.available())
+            {
+                HUSKYLENSResult result = huskylens.read();
+                printResult(result);
+                detected = result.ID;
+                if (detected == 1) {
+                  myServo.write(90);
+                  Serial.println(F("Detected"));
+                  delay(200);
+                }
+                else {
+                  myServo.write(0);
+                  delay(2000);
+                }
+            }
+        }    
+      //}
+    }
+   // else {
+   // if (pirState == HIGH) {
+      // 상태가 HIGH에서 LOW로 변경될 때
+    //  pirState = LOW;  // 상태를 LOW로 변경
+    }
+  //}
+//}
+
+void printResult(HUSKYLENSResult result){
+    if (result.command == COMMAND_RETURN_BLOCK){
+//        Serial.println(String()+F("Block:xCaenter=")+result.xCenter+F(",yCenter=")+result.yCenter+F(",width=")+result.width+F(",height=")+result.height+F(",ID=")+result.ID);
+        Serial.println(result.ID);
+    }
+    else if (result.command == COMMAND_RETURN_ARROW){
+        Serial.println(String()+F("Arrow:xOrigin=")+result.xOrigin+F(",yOrigin=")+result.yOrigin+F(",xTarget=")+result.xTarget+F(",yTarget=")+result.yTarget+F(",ID=")+result.ID);
+    }
+    else{
+        Serial.println("Object unknown!");
+    }
+}
+[/code]
