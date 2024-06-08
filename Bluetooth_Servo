@@ -1,0 +1,40 @@
+#include <Servo.h>
+#include<SoftwareSerial.h>
+
+SoftwareSerial Bluetooth(10, 11);
+
+
+Servo myservo;
+int servoPin = 9; // 10 seconds
+
+void setup() {
+  myservo.attach(servoPin);
+  Serial.begin(9600);
+  myservo.write(0); // 기본 상태를 "닫힘"으로 설정
+  Bluetooth.begin(38400);
+
+  Serial.println("Bluetooth Module Setup Mode");
+  Serial.println("Select [Both NL & CR] in Serial Monitior");
+
+}
+
+void loop() {
+  // Bluetooth 포트로부터 데이터 읽기
+  if (Bluetooth.available() > 0) {
+    String command = Bluetooth.readStringUntil('\n'); // Bluetooth에서 줄바꿈을 하기 전까지의 string을 저장
+    processCommand(command);
+  }
+}
+
+void processCommand(String command) {
+  command.trim(); // 명령어의 앞뒤 공백 제거
+  if (command == "open") {
+    myservo.write(90); // 잠금 해제
+    Serial.println("Door opened");
+  } else if (command == "lock") {
+    myservo.write(0);  // 잠금
+    Serial.println("Door locked");
+  } else {
+    Serial.println("Unknown command: " + command);
+  }
+}
