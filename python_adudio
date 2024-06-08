@@ -1,0 +1,44 @@
+//library
+//sudo apt-get update
+//sudo apt-get install python3-pip
+pip3 install pyserial pygame
+
+
+
+import serial
+import time
+import pygame
+import os
+
+# Set Serial Port
+ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
+time.sleep(2)  # 아두이노 초기화 시간 대기
+
+# setup bluebooth speaker
+bluetooth_mac_address = "00:11:22:33:44:55"  # 블루투스 스피커의 MAC 주소
+os.system(f"bluetoothctl connect {bluetooth_mac_address}")
+
+# path of file
+audio_file = "/home/pi/your_audio_file.wav"
+
+# setup pygame
+pygame.mixer.init()
+
+def play_audio(file_path):
+    pygame.mixer.music.load(file_path)
+    pygame.mixer.music.play()
+    while pygame.mixer.music.get_busy():
+        time.sleep(0.1)
+
+if __name__ == "__main__":
+    try:
+        while True:
+            if ser.in_waiting > 0:
+                line = ser.readline().decode('utf-8').rstrip()
+                if line == "PLAY":
+                    print("Playing audio file")
+                    play_audio(audio_file)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        ser.close()
