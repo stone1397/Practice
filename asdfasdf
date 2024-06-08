@@ -1,0 +1,24 @@
+import time
+from datetime import datetime
+import serial
+
+ser = serial.Serial("/dev/ttyACM0", baudrate=9600, timeout=None)
+
+def send_servo_command(command):
+	if command not in [0, 1]:
+		raise ValueError("Command must be 0 or 1")
+	ser.write(f"{command}\n".encode())
+
+
+
+while True:
+	if ser.in_waiting > 0:
+		try:
+			line = ser.readline().decode('utf-8').rstrip()
+			print(line)
+			with open("log.txt", "a") as file:
+				if line == "Detected":
+					timestamp = datetime.now().strftime("%Y%m%d %H:%M:%S")
+					file.write(f"Detected at: {timestamp}\n")
+		except:
+			pass
