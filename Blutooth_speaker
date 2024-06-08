@@ -1,0 +1,30 @@
+# pip install pyserial pygame
+
+import serial
+import pygame
+
+# 시리얼 포트 설정 (아두이노와 연결된 포트를 사용)
+serial_port = '/dev/ttyACM0'  # 실제 연결된 포트를 사용
+baud_rate = 9600
+
+# 시리얼 통신 시작
+ser = serial.Serial(serial_port, baud_rate)
+
+# pygame 초기화 및 오디오 시스템 초기화
+pygame.mixer.init()
+
+# 재생할 음성 파일 경로
+audio_file = 'path_to_your_audio_file.wav'  # 실제 음성 파일 경로
+
+def play_audio(file):
+    pygame.mixer.music.load(file)
+    pygame.mixer.music.play()
+
+try:
+    while True:
+        if ser.in_waiting > 0:
+            data = ser.readline().decode('utf-8').strip()
+            if data == '1':
+                play_audio(audio_file)
+finally:
+    ser.close()
